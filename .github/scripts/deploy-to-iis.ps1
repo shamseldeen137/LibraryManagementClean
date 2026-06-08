@@ -52,6 +52,21 @@ try {
     exit 1
 }
 
+# If deployment-time Mongo settings are provided via environment variables, write an appsettings.Production.json
+try {
+    if ($env:MONGO_CONN -or $env:MONGO_DB) {
+        $mongoConn = if ($env:MONGO_CONN) { $env:MONGO_CONN } else { 'mongodb://localhost:27017' }
+        $mongoDb = if ($env:MONGO_DB) { $env:MONGO_DB } else { 'LibraryManagementClean' }
+        $settings = @{ Mongo = @{ ConnectionString = $mongoConn; DatabaseName = $mongoDb } }
+        $json = $settings | ConvertTo-Json -Depth 5
+        $file = Join-Path $DestinationPath 'appsettings.Production.json'
+        Set-Content -Path $file -Value $json -Encoding UTF8 -Force
+        Write-Host "Wrote production appsettings to $file"
+    }
+} catch {
+    Write-Warning "Failed to write production appsettings: $_"
+}
+
 try {
     Write-Host "Starting App Pool: $AppPoolName"
     Start-WebAppPool -Name $AppPoolName -ErrorAction Stop

@@ -50,6 +50,8 @@ jobs:
           IIS_SITE: ${{ secrets.IIS_SITE }}
           APP_POOL: ${{ secrets.IIS_APP_POOL }}
           DEST_PATH: ${{ secrets.IIS_DEST_PATH }}
+          MONGO_CONN: ${{ secrets.MONGO_CONN }}
+          MONGO_DB: ${{ secrets.MONGO_DB }}
         shell: powershell
         run: |
           Write-Host "Deploying to IIS site: $env:IIS_SITE"
