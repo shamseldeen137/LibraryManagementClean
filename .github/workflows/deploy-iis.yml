@@ -1,0 +1,61 @@
+name: CI/CD - Build and Deploy to IIS
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore src\LibraryManagement.Api\LibraryManagement.Api.csproj
+
+      - name: Build solution
+        run: dotnet build --configuration Release src\LibraryManagement.sln --no-restore
+
+      - name: Publish API
+        run: dotnet publish src\LibraryManagement.Api\LibraryManagement.Api.csproj -c Release -o ${{ github.workspace }}\artifacts\publish
+
+      - name: Upload publish artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: publish
+          path: artifacts\publish
+
+  deploy:
+    needs: build
+    runs-on: [self-hosted, windows]
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: publish
+          path: release
+
+      - name: Deploy to IIS on self-hosted runner
+        env:
+          IIS_SITE: ${{ secrets.IIS_SITE }}
+          APP_POOL: ${{ secrets.IIS_APP_POOL }}
+          DEST_PATH: ${{ secrets.IIS_DEST_PATH }}
+        shell: powershell
+        run: |
+          Write-Host "Deploying to IIS site: $env:IIS_SITE"
+          .\.github\scripts\deploy-to-iis.ps1 -SourceFolder "${{ github.workspace }}\release\publish" -IISSiteName $env:IIS_SITE -AppPoolName $env:APP_POOL -DestinationPath $env:DEST_PATH
+
+# Notes:
+# - Configure repository secrets: IIS_SITE, IIS_APP_POOL, IIS_DEST_PATH on GitHub.
+# - The deploy job must run on a self-hosted Windows runner with IIS and necessary permissions.
+# - The deploy script will stop the app pool, replace files, and restart the app pool.
