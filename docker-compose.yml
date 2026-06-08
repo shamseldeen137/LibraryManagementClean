@@ -1,4 +1,39 @@
+version: '3.8'
+
 services:
+  api:
+    build:
+      context: .
+      dockerfile: src/LibraryManagement.Api/Dockerfile
+    ports:
+      - "5000:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Mongo__ConnectionString=mongodb://mongo:27017
+      - Mongo__DatabaseName=LibraryManagementClean
+      - ConnectionStrings__Redis=redis:6379
+      - RabbitMq__HostName=rabbitmq
+      - Kafka__BootstrapServers=kafka:9092
+    depends_on:
+      - mongo
+      - redis
+      - rabbitmq
+      - kafka
+
+  consumers:
+    build:
+      context: .
+      dockerfile: src/LibraryManagement.Consumers/Dockerfile
+    environment:
+      - Mongo__ConnectionString=mongodb://mongo:27017
+      - Mongo__DatabaseName=LibraryManagementClean
+      - RabbitMq__HostName=rabbitmq
+      - Kafka__BootstrapServers=kafka:9092
+    depends_on:
+      - mongo
+      - rabbitmq
+      - kafka
+
   mongo:
     image: mongo:7
     container_name: library-mongo

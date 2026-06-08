@@ -1,0 +1,10 @@
+**/bin/
+**/obj/
+**/.vs/
+.vscode/
+.github/
+*.user
+*.suo
+*.log
+docker-compose*.yml
+**/*.md
