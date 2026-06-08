@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="docker-compose.yml" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/LibraryManagement.Api/LibraryManagement.Api.csproj" />
+    <Project Path="src/LibraryManagement.Application/LibraryManagement.Application.csproj" />
+    <Project Path="src/LibraryManagement.Consumers/LibraryManagement.Consumers.csproj" />
+    <Project Path="src/LibraryManagement.Domain/LibraryManagement.Domain.csproj" />
+    <Project Path="src/LibraryManagement.Infrastructure/LibraryManagement.Infrastructure.csproj" />
+  </Folder>
+</Solution>
